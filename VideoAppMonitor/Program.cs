@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using Newtonsoft.Json;
 using Server;
 
 namespace VideoAppMonitor
@@ -12,8 +13,16 @@ namespace VideoAppMonitor
     class Program
     {
         static List<ExternalExe> process_list = new List<ExternalExe>();
+        static string environment_monitored_fold1 = @"C:\davs";
+        static int fold1_max_file_count = 50;
+        static string environment_monitored_fold2 = @"C:\pics";
+        static int fold2_max_file_count = 50;
+
+
+
         static void Main(string[] args)
         {
+            importData();
 
             process_list.Add(new ExternalExe("视频图片监控", @"./videoApp/Bmp2Png/视频图片监控.exe"));
             process_list.Add(new ExternalExe("视频DAV文件监控", @"./videoApp/DavReporter/视频DAV文件监控.exe"));
@@ -48,27 +57,66 @@ namespace VideoAppMonitor
         }
         static void start_process_monitor()
         {
-            System.Timers.Timer timer = new System.Timers.Timer(5000);
+            System.Timers.Timer timer = new System.Timers.Timer(15000);
             timer.Elapsed += (sender, e) =>
             {
-                foreach (ExternalExe exe in process_list)
+                if (environmentOk())
                 {
-                    Process[] finded_processes = Process.GetProcessesByName(exe.name);
-                    if (finded_processes.Length > 0)
+                    //检测是否有应用异常退出，如果有则将其启动
+                    foreach (ExternalExe exe in process_list)
                     {
-                    }
-                    else
-                    {
-                        Console.WriteLine(exe.name + " 已经退出，即将重启...");
-                        exe.start_process();//多次启动无效咋办？
+                        Process[] finded_processes = Process.GetProcessesByName(exe.name);
+                        if (finded_processes.Length > 0)
+                        {
+                        }
+                        else
+                        {
+                            Console.WriteLine(exe.name + " 已经退出，即将重启...");
+                            exe.start_process();//多次启动无效咋办？
+                        }
                     }
                 }
-
+                else
+                {
+                    kill_all_process();
+                    ErrorManager.AddError(ErrorManager.FirstLevelError);
+                }
             };
             timer.Enabled = true;
             //Process[] processes = Process.GetProcessesByName("视频图片监控");
         }
-        static void kill_all_process
+        static bool environmentOk()
+        {
+            Func<string, int, bool> checkFileCount =
+                 (path, count) =>
+                 {
+                     DirectoryInfo TheFolder = new DirectoryInfo(path);
+
+                     FileInfo[] all_files = TheFolder.GetFiles();
+                     if (all_files.Length > count)
+                     {
+                         return false;
+                     }
+                     return true;
+                 };
+
+            if (checkFileCount(environment_monitored_fold1, fold1_max_file_count)
+                && checkFileCount(environment_monitored_fold2, fold2_max_file_count))
+            {
+                return true;
+
+            }
+            else
+                return false;
+        }
+        //关闭所有启动的程序
+        static void kill_all_process()
+        {
+            foreach (ExternalExe exe in process_list)
+            {
+                exe.kill_process();
+            }
+        }
         static void start_exe()
         {
             string file_name = "./videoApp/Player/Player10001.exe";
@@ -91,6 +139,23 @@ namespace VideoAppMonitor
                     Console.WriteLine(line);
                     line = reader.ReadLine();
                 }
+            }
+        }
+        static void importData()
+        {
+            string strReadFilePath1 = @"./config/config_monitor.txt";
+            StreamReader srReadFile1 = new StreamReader(strReadFilePath1);
+            string strConfig = srReadFile1.ReadToEnd();
+            srReadFile1.Close();
+            // eg. {"src_file_path":"C:\\Users\\ssor\\Desktop\\pics","dest_file_path":"C:\\Users\\ssor\\Desktop\\picpng","max_file_count":5}
+            Debug.WriteLine(strConfig);
+            Config cfg = (Config)JsonConvert.DeserializeObject<Config>(strConfig);
+            if (cfg != null)
+            {
+                environment_monitored_fold1 = cfg.src_file_path1;
+                environment_monitored_fold2 = cfg.src_file_path2;
+                fold1_max_file_count = cfg.max_file_count1;
+                fold2_max_file_count = cfg.max_file_count2;
             }
         }
     }
@@ -156,5 +221,23 @@ namespace VideoAppMonitor
                 process = null;
             }
         }
+    }
+    public class Config
+    {
+        public string src_file_path1;
+        public int max_file_count1;
+        public string src_file_path2;
+        public int max_file_count2;
+
+        public Config(string _src_file_path1, int _max_file_count1, string _src_file_path2, int _max_file_count2)
+        {
+            this.src_file_path1 = _src_file_path1;
+            this.max_file_count1 = _max_file_count1;
+
+            this.src_file_path2 = _src_file_path2;
+            this.max_file_count2 = _max_file_count2;
+        }
+
+
     }
 }
