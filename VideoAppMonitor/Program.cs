@@ -27,18 +27,18 @@ namespace VideoAppMonitor
             process_list.Add(new ExternalExe("视频图片监控", @"./videoApp/Bmp2Png/视频图片监控.exe"));
             process_list.Add(new ExternalExe("视频DAV文件监控", @"./videoApp/DavReporter/视频DAV文件监控.exe"));
 
-            process_list.Add(new ExternalExe("Player10001", @"./videoApp/Player/Player10001.exe"));
+            //process_list.Add(new ExternalExe("Player10001", @"./videoApp/Player/Player10001.exe"));
             //process_list.Add(new ExternalExe("Player10002", @"./videoApp/Player/Player10002.exe"));
             //process_list.Add(new ExternalExe("Player10003", @"./videoApp/Player/Player10003.exe"));
 
             process_list.Add(new ExternalExe("Client10001", @"./videoApp/Client/Client10001.exe", ErrorManager.clientReboot));
-            //process_list.Add(new ExternalExe("Client10002", @"./videoApp/Client/Client10002.exe"));
-            //process_list.Add(new ExternalExe("Client10003", @"./videoApp/Client/Client10003.exe"));
+            //process_list.Add(new ExternalExe("Client10002", @"./videoApp/Client/Client10002.exe", ErrorManager.clientReboot));
+            //process_list.Add(new ExternalExe("Client10003", @"./videoApp/Client/Client10003.exe", ErrorManager.clientReboot));
 
 
             foreach (ExternalExe exe in process_list)
             {
-                exe.start_process();
+                createStartExeFunc(exe)();
             }
 
 
@@ -65,15 +65,7 @@ namespace VideoAppMonitor
                     //检测是否有应用异常退出，如果有则将其启动
                     foreach (ExternalExe exe in process_list)
                     {
-                        Process[] finded_processes = Process.GetProcessesByName(exe.name);
-                        if (finded_processes.Length > 0)
-                        {
-                        }
-                        else
-                        {
-                            Console.WriteLine(exe.name + " 已经退出，即将重启...");
-                            exe.start_process();//多次启动无效咋办？
-                        }
+                        createStartExeFunc(exe)();
                     }
                 }
                 else
@@ -84,6 +76,22 @@ namespace VideoAppMonitor
             };
             timer.Enabled = true;
             //Process[] processes = Process.GetProcessesByName("视频图片监控");
+        }
+        static Action createStartExeFunc(ExternalExe exe)
+        {
+            return () =>
+            {
+                Process[] finded_processes = Process.GetProcessesByName(exe.name);
+                if (finded_processes.Length > 0)
+                {
+                }
+                else
+                {
+                    Console.WriteLine(exe.name + " 已经退出，即将重启...");
+                    exe.start_process();//多次启动无效咋办？
+                }
+
+            };
         }
         static bool environmentOk()
         {
