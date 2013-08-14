@@ -17,7 +17,7 @@ namespace Server
         public static StringBuilder sbuilder = new StringBuilder();
         public static Socket serverSocket;
         static byte[] byteData = new byte[1024];
-        public static void startUDPListening()
+        public static void startUDPListening(int port)
         {
             try
             {
@@ -25,7 +25,7 @@ namespace Server
                 serverSocket = new Socket(AddressFamily.InterNetwork,
                     SocketType.Dgram, ProtocolType.Udp);
                 IPAddress ip = IPAddress.Parse(GetLocalIP4());
-                IPEndPoint ipEndPoint = new IPEndPoint(ip, 4999);
+                IPEndPoint ipEndPoint = new IPEndPoint(ip, port);
                 //                IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.Any, port);
 
                 //Bind this address to the server
