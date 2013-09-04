@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoAppMonitor", "VideoAppMonitor\VideoAppMonitor.csproj", "{2768EAD5-33E0-4ABE-9C0C-7F776051EBDF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{74B18D5E-368B-4DF0-B435-7B5CC21A3322}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +15,10 @@ Global
 		{2768EAD5-33E0-4ABE-9C0C-7F776051EBDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2768EAD5-33E0-4ABE-9C0C-7F776051EBDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2768EAD5-33E0-4ABE-9C0C-7F776051EBDF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74B18D5E-368B-4DF0-B435-7B5CC21A3322}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74B18D5E-368B-4DF0-B435-7B5CC21A3322}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74B18D5E-368B-4DF0-B435-7B5CC21A3322}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74B18D5E-368B-4DF0-B435-7B5CC21A3322}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

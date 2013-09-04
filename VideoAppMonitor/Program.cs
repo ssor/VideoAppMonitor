@@ -32,8 +32,8 @@ namespace VideoAppMonitor
             //process_list.Add(new ExternalExe("Player10003", @"./videoApp/Player/Player10003.exe"));
 
             process_list.Add(new ExternalExe("Client10001", @"./videoApp/Client/Client10001.exe", ErrorManager.clientReboot));
-            //process_list.Add(new ExternalExe("Client10002", @"./videoApp/Client/Client10002.exe", ErrorManager.clientReboot));
-            //process_list.Add(new ExternalExe("Client10003", @"./videoApp/Client/Client10003.exe", ErrorManager.clientReboot));
+            process_list.Add(new ExternalExe("Client10002", @"./videoApp/Client/Client10002.exe", ErrorManager.clientReboot));
+            process_list.Add(new ExternalExe("Client10003", @"./videoApp/Client/Client10003.exe", ErrorManager.clientReboot));
 
             Func<bool> func = () =>
             {
@@ -42,7 +42,7 @@ namespace VideoAppMonitor
                      createEnvironmentCheckFun(environment_monitored_fold1, fold1_max_file_count),
                      createEnvironmentCheckFun(environment_monitored_fold2, fold2_max_file_count)
                 };
-                return checkEnvironment(func_list, true);
+                return checkEnvironment(func_list);
             };
             //启动应用，并同时启动监控timer
             start_process_monitor(15000, process_list, func)();
@@ -79,13 +79,18 @@ namespace VideoAppMonitor
             return dele;
         }
 
-        static bool checkEnvironment(List<Func<bool>> predictor_list, bool pre_predictor_result)
+        static bool checkEnvironment(List<Func<bool>> predictor_list)
         {
-            if (pre_predictor_result == false) return false;
-            if (predictor_list.Count <= 0) return pre_predictor_result;
+            if (predictor_list == null || predictor_list.Count <= 0) return true;
+            IEnumerable<Func<bool>> tempList = predictor_list.Where(_predictor => _predictor());
+            return tempList.Count() <= 0;
 
-            int count = predictor_list.Count;
-            return checkEnvironment(predictor_list.GetRange(0, count - 1), predictor_list[count - 1]());
+
+            //if (pre_predictor_result == false) return false;
+            //if (predictor_list.Count <= 0) return pre_predictor_result;
+
+            //int count = predictor_list.Count;
+            //return checkEnvironment(predictor_list.GetRange(0, count - 1), predictor_list[count - 1]());
         }
 
         static Action createStartExeFunc(ExternalExe exe)
@@ -121,17 +126,19 @@ namespace VideoAppMonitor
             return checkFileCount;
         }
 
-        static void start_all_process(List<ExternalExe> list)
+        static void start_all_process(List<ExternalExe> _list)
         {
-            foreach (ExternalExe exe in list)
+            List<ExternalExe> tempList = new List<ExternalExe>(_list);
+            foreach (ExternalExe exe in tempList)
             {
                 createStartExeFunc(exe)();
             }
         }
         //关闭所有启动的程序
-        static void kill_all_process(List<ExternalExe> list)
+        static void kill_all_process(List<ExternalExe> _list)
         {
-            foreach (ExternalExe exe in list)
+            List<ExternalExe> tempList = new List<ExternalExe>(_list);
+            foreach (ExternalExe exe in tempList)
             {
                 exe.kill_process();
             }
@@ -154,8 +161,8 @@ namespace VideoAppMonitor
         }
 
         static void createExternalExe(string _name, string _full_path)
-        { 
-            
+        {
+
         }
     }
     class ExternalExe
